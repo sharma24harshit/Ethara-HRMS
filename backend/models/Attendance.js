@@ -1,28 +1,38 @@
 const mongoose = require('mongoose');
 
+// ─────────────────────────────────────────────────────────────
+//  Monthly Summary Model
+//  One document per employee per month.
+//  days:  { "01": "Present", "15": "Absent", ... }
+//  Counts are kept in sync on every write so reads are O(1).
+// ─────────────────────────────────────────────────────────────
 const attendanceSchema = new mongoose.Schema(
   {
     employeeId: {
       type: String,
       required: [true, 'Employee ID is required'],
+      index: true,
     },
-    date: {
+    // YYYY-MM  e.g. "2025-02"
+    month: {
       type: String,
-      required: [true, 'Date is required'],
-      match: [/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format'],
+      required: [true, 'Month is required'],
+      match: [/^\d{4}-\d{2}$/, 'Month must be in YYYY-MM format'],
     },
-    status: {
-      type: String,
-      enum: {
-        values: ['Present', 'Absent'],
-        message: 'Status must be either Present or Absent',
-      },
-      required: [true, 'Status is required'],
+    // Keys are zero-padded day strings "01"–"31"
+    // Values are "Present" | "Absent"
+    days: {
+      type: Object,
+      default: {},
     },
+    presentCount: { type: Number, default: 0, min: 0 },
+    absentCount:  { type: Number, default: 0, min: 0 },
+    totalMarked:  { type: Number, default: 0, min: 0 },
   },
   { timestamps: true }
 );
-// To prevent duplicate attendance for same employee
-attendanceSchema.index({ employeeId: 1, date: 1 }, { unique: true });
+
+// One doc per employee per month
+attendanceSchema.index({ employeeId: 1, month: 1 }, { unique: true });
 
 module.exports = mongoose.model('Attendance', attendanceSchema);
