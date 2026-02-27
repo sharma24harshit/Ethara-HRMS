@@ -75,14 +75,6 @@ const Dashboard = () => {
             <span className="text-[10px] text-t3 uppercase tracking-widest font-semibold">Today</span>
             <span className="font-display font-semibold text-[15px] text-accent">{today}</span>
           </div>
-          <button
-            onClick={() => setShowAdd(true)}
-            className="flex items-center gap-2 bg-accent hover:bg-accent-h text-white
-                       font-display font-semibold text-[14px] px-5 py-2.5 rounded-xl
-                       shadow-glow-accent transition-all active:scale-[0.98] whitespace-nowrap"
-          >
-            <span className="text-base leading-none">＋</span> Add Employee
-          </button>
         </div>
       </header>
 
@@ -101,6 +93,16 @@ const Dashboard = () => {
       </div>
 
       {/* ── Employee Table ── */}
+      <div className='flex justify-end mb-2'>
+      <button
+            onClick={() => setShowAdd(true)}
+            className="flex items-center gap-2 bg-accent hover:bg-accent-h text-white
+                       font-display font-semibold text-[14px] px-5 py-2.5 rounded-xl
+                       shadow-glow-accent transition-all active:scale-[0.98] whitespace-nowrap"
+          >
+            <span className="text-base leading-none">＋</span> Add Employee
+          </button>
+      </div>
       <main>
         <EmployeeList
           employees={employees}
