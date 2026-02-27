@@ -1,157 +1,288 @@
-import React, { useState } from 'react';
-import { deleteEmployee, markAttendance } from '../services/api';
+import React, { useState, useEffect, useCallback } from 'react';
+import { deleteEmployee, markAttendance, getAttendanceByDate } from '../services/api';
 import AttendanceHistory from './AttendanceHistory';
 import Loader from './Loader';
 import getTodayDate from '../utils/getTodayDate';
 
-const EmployeeList = ({ employees, todayAttendance, presentDaySummary = {}, loading, onRefresh }) => {
-  const [historyEmployee, setHistoryEmployee] = useState(null);
-  const [actionLoading, setActionLoading]     = useState('');
-  const [error, setError]                     = useState('');
+/* ── Shared input style ── */
+const inputCls =
+  'bg-elevated border border-line rounded-lg text-t1 font-body text-[13px] font-medium ' +
+  'px-3 py-1.5 outline-none transition-all duration-200 cursor-pointer ' +
+  'focus:border-accent focus:ring-2 focus:ring-accent/20';
 
+/* ── Thin action button ── */
+const actionBtn = (extra = '') =>
+  `inline-flex items-center gap-1 px-2.5 py-1 border border-line rounded-md
+   bg-elevated text-t2 text-[12px] font-medium whitespace-nowrap
+   transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed ${extra}`;
+
+const EmployeeList = ({ employees, presentDaySummary = {}, loading, onRefresh }) => {
   const today = getTodayDate();
 
-  const getTodayStatus = (employeeId) => {
-    const record = todayAttendance.find((r) => r.employeeId === employeeId);
-    return record ? record.status : null;
-  };
+  const [selectedDate,   setSelectedDate] = useState(today);
+  const [dateAttendance, setDateAtt]      = useState([]);
+  const [attLoading,     setAttLoading]   = useState(false);
+  const [historyEmp,     setHistoryEmp]   = useState(null);
+  const [actionLoading,  setActionLoad]   = useState('');
+  const [error,          setError]        = useState('');
+
+  /* ── Fetch attendance for selected date ── */
+  const fetchDateAttendance = useCallback(async (date) => {
+    setAttLoading(true);
+    try {
+      const res = await getAttendanceByDate(date);
+      setDateAtt(res.data.data);
+    } catch { /* silent */ }
+    finally { setAttLoading(false); }
+  }, []);
+
+  useEffect(() => { fetchDateAttendance(selectedDate); }, [selectedDate, fetchDateAttendance]);
+
+  /* ── Helpers ── */
+  const getStatus  = (id) => dateAttendance.find((r) => r.employeeId === id)?.status ?? null;
+  const isToday    = selectedDate === today;
+  const isFuture   = selectedDate > today;
+  const dateLabel  = isToday ? "Today's Status" : `Status · ${selectedDate}`;
+
+  /* ── Handlers ── */
+  const handleDateChange = (e) => { setSelectedDate(e.target.value); setError(''); };
 
   const handleAttendance = async (employeeId, status) => {
-    setActionLoading(`${employeeId}-${status}`);
-    setError('');
+    if (isFuture) return;
+    setActionLoad(`${employeeId}-${status}`); setError('');
     try {
-      await markAttendance({ employeeId, date: today, status });
+      await markAttendance({ employeeId, date: selectedDate, status });
+      fetchDateAttendance(selectedDate);
       onRefresh();
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to mark attendance.');
-    } finally {
-      setActionLoading('');
-    }
+    } finally { setActionLoad(''); }
   };
 
   const handleDelete = async (employeeId, fullName) => {
     if (!window.confirm(`Delete employee "${fullName}"? This cannot be undone.`)) return;
-    setActionLoading(`delete-${employeeId}`);
-    setError('');
+    setActionLoad(`delete-${employeeId}`); setError('');
     try {
       await deleteEmployee(employeeId);
       onRefresh();
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to delete employee.');
-    } finally {
-      setActionLoading('');
-    }
+    } finally { setActionLoad(''); }
   };
 
+  /* ── Loading skeleton ── */
   if (loading) return (
-    <div className="card list-card">
+    <div className="bg-surface border border-line rounded-2xl p-8">
       <Loader text="Loading employees…" />
     </div>
   );
 
+  /* ── Main render ── */
   return (
-    <div className="card list-card">
-      <div className="card-header">
-        <span className="card-icon">👥</span>
-        <h2 className="card-title">Employees</h2>
-        <span className="count-badge">{employees.length}</span>
+    <div className="bg-surface border border-line rounded-2xl animate-fade-up">
+
+      {/* Card Header */}
+      <div className="flex flex-wrap items-center justify-between gap-4 px-8 py-5
+                      border-b border-line">
+        {/* Left: title */}
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 flex items-center justify-center bg-elevated
+                          border border-line rounded-md text-lg flex-shrink-0">👥</div>
+          <h2 className="font-display font-bold text-[18px] text-t1">Employees</h2>
+          <span className="bg-accent/10 border border-accent/20 text-accent text-[12px]
+                           font-semibold rounded-full px-2.5 py-0.5 font-display">
+            {employees.length}
+          </span>
+        </div>
+
+        {/* Right: date toolbar */}
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex flex-col gap-1">
+            <label htmlFor="att-date-picker"
+              className="text-[10px] font-semibold uppercase tracking-widest text-t3">
+              Marking attendance for
+            </label>
+            <div className="flex items-center gap-2">
+              <input
+                id="att-date-picker"
+                type="date"
+                value={selectedDate}
+                max={today}
+                onChange={handleDateChange}
+                className={inputCls}
+              />
+              {!isToday && (
+                <button
+                  onClick={() => setSelectedDate(today)}
+                  className="flex items-center gap-1 px-3 py-1.5 bg-accent/10 border
+                             border-accent/25 rounded-lg text-accent text-[12px] font-semibold
+                             transition-all hover:bg-accent/20 whitespace-nowrap"
+                >↩ Today</button>
+              )}
+            </div>
+          </div>
+          {!isToday && (
+            <span className="flex items-center gap-1.5 px-2.5 py-1 bg-gold/10 border
+                             border-gold/20 rounded-full text-gold text-[11px] font-semibold
+                             animate-fade-up self-end mb-0.5">
+              📅 Editing past date
+            </span>
+          )}
+        </div>
       </div>
 
+      {/* Error */}
       {error && (
-        <div className="alert alert-error" style={{ marginBottom: '1rem' }}>{error}</div>
+        <div className="mx-8 mt-4 flex items-center gap-2 bg-rose/10 border border-rose/20
+                        text-rose text-sm font-medium rounded-lg px-4 py-2.5 animate-fade-up">
+          <span>⚠</span> {error}
+        </div>
       )}
 
+      {/* Empty state */}
       {employees.length === 0 ? (
-        <div className="empty-state">
-          <span className="empty-icon">🏢</span>
-          <p>No employees yet. Click <strong>Add Employee</strong> to get started.</p>
+        <div className="flex flex-col items-center justify-center py-16 text-t3">
+          <span className="text-5xl mb-4 opacity-40">🏢</span>
+          <p className="text-sm">No employees yet. Click <strong className="text-t2">Add Employee</strong> to get started.</p>
         </div>
       ) : (
-        <div className="table-wrapper">
-          <table className="data-table">
+        <div className="overflow-x-auto">
+          <table className="w-full text-[13.5px] border-collapse">
             <thead>
               <tr>
-                <th>Employee ID</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Department</th>
-                <th>Today's Status</th>
-                <th>Total Present Days</th>
-                <th>Actions</th>
+                {['Employee ID', 'Name & Email', 'Department', dateLabel, 'All-Time Summary', 'Actions'].map((h, i) => (
+                  <th key={i}
+                    className="text-left text-[11px] font-bold uppercase tracking-widest
+                               text-t3 px-5 py-3.5 border-b border-line whitespace-nowrap">
+                    {h === dateLabel && attLoading
+                      ? <span>{h} <span className="inline-block w-1.5 h-1.5 rounded-full bg-accent
+                                                    align-middle ml-1 animate-dot-pulse" /></span>
+                      : h}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
               {employees.map((emp) => {
-                const todayStatus   = getTodayStatus(emp.employeeId);
-                const summary       = presentDaySummary[emp.employeeId];
-                const totalPresent  = summary?.totalPresent ?? 0;
-                const totalMarked   = summary?.totalMarked  ?? 0;
+                const status      = getStatus(emp.employeeId);
+                const summary     = presentDaySummary[emp.employeeId];
+                const tPresent    = summary?.totalPresent ?? 0;
+                const tAbsent     = summary?.totalAbsent  ?? 0;
+                const tMarked     = summary?.totalMarked  ?? 0;
 
                 return (
-                  <tr key={emp._id}>
-                    <td>
-                      <span className="emp-id-badge">{emp.employeeId}</span>
+                  <tr key={emp._id}
+                    className="border-b border-line/50 last:border-0 hover:bg-hover transition-colors">
+
+                    {/* Employee ID */}
+                    <td className="px-5 py-3.5">
+                      <span className="bg-elevated border border-line rounded px-2 py-0.5
+                                       font-mono text-[12px] text-accent">
+                        {emp.employeeId}
+                      </span>
                     </td>
-                    <td className="emp-name">{emp.fullName}</td>
-                    <td className="emp-email">{emp.email}</td>
-                    <td>
-                      <span className="dept-badge">{emp.department}</span>
+
+                    {/* Name + Email */}
+                    <td className="px-5 py-3.5">
+                      <div className="text-t1 font-medium">{emp.fullName}</div>
+                      <div className="text-t3 text-[12px] mt-0.5">{emp.email}</div>
                     </td>
-                    <td>
-                      {todayStatus ? (
-                        <span className={`status-badge ${todayStatus === 'Present' ? 'status-present' : 'status-absent'}`}>
-                          {todayStatus}
+
+                    {/* Department */}
+                    <td className="px-5 py-3.5">
+                      <span className="bg-accent/10 border border-accent/20 text-accent-h
+                                       text-[12px] font-medium rounded-full px-2.5 py-0.5">
+                        {emp.department}
+                      </span>
+                    </td>
+
+                    {/* Status for selected date */}
+                    <td className="px-5 py-3.5">
+                      {attLoading ? (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full
+                                         text-[12px] font-semibold border bg-elevated
+                                         border-line text-t3">…</span>
+                      ) : status ? (
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full
+                                          text-[12px] font-semibold border
+                                          ${status === 'Present'
+                                            ? 'bg-jade/10 border-jade/20 text-jade'
+                                            : 'bg-rose/10 border-rose/20 text-rose'}`}>
+                          {status}
                         </span>
                       ) : (
-                        <span className="status-badge status-none">Not Marked</span>
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full
+                                         text-[12px] font-semibold border bg-elevated
+                                         border-line text-t3">Not Marked</span>
                       )}
                     </td>
-                    <td>
-                      <div className="present-days-cell">
-                        <span className="present-days-num">{totalPresent}</span>
-                        {totalMarked > 0 && (
-                          <span className="present-days-sub">/ {totalMarked} marked</span>
-                        )}
+
+                    {/* All-time summary */}
+                    <td className="px-5 py-3.5">
+                      <div className="flex items-center gap-2">
+                        <span title="Present days"
+                          className="font-display font-bold text-jade text-[13px]">
+                          ✓ {tPresent}
+                        </span>
+                        <span className="text-line text-[12px]">|</span>
+                        <span title="Absent days"
+                          className="font-display font-bold text-rose text-[13px]">
+                          ✗ {tAbsent}
+                        </span>
+                        <span className="text-line text-[12px]">|</span>
+                        <span title="Total marked" className="text-t3 text-[12px]">
+                          {tMarked}d
+                        </span>
                       </div>
                     </td>
-                    <td>
-                      <div className="action-group">
+
+                    {/* Actions */}
+                    <td className="px-5 py-3.5">
+                      <div className="flex items-center gap-1.5 flex-wrap">
                         <button
-                          className={`btn-action btn-present ${todayStatus === 'Present' ? 'active' : ''}`}
                           onClick={() => handleAttendance(emp.employeeId, 'Present')}
-                          disabled={!!actionLoading}
-                          title="Mark Present"
+                          disabled={!!actionLoading || isFuture}
+                          title={isFuture ? 'Cannot mark future dates' : 'Mark Present'}
+                          className={actionBtn(
+                            status === 'Present'
+                              ? 'bg-jade/10 border-jade/20 text-jade'
+                              : 'hover:bg-jade/10 hover:border-jade/20 hover:text-jade'
+                          )}
                         >
                           {actionLoading === `${emp.employeeId}-Present`
-                            ? <Loader size="sm" />
-                            : '✓ Present'}
+                            ? <Loader size="sm" /> : '✓ Present'}
                         </button>
+
                         <button
-                          className={`btn-action btn-absent ${todayStatus === 'Absent' ? 'active' : ''}`}
                           onClick={() => handleAttendance(emp.employeeId, 'Absent')}
-                          disabled={!!actionLoading}
-                          title="Mark Absent"
+                          disabled={!!actionLoading || isFuture}
+                          title={isFuture ? 'Cannot mark future dates' : 'Mark Absent'}
+                          className={actionBtn(
+                            status === 'Absent'
+                              ? 'bg-rose/10 border-rose/20 text-rose'
+                              : 'hover:bg-rose/10 hover:border-rose/20 hover:text-rose'
+                          )}
                         >
                           {actionLoading === `${emp.employeeId}-Absent`
-                            ? <Loader size="sm" />
-                            : '✗ Absent'}
+                            ? <Loader size="sm" /> : '✗ Absent'}
                         </button>
+
                         <button
-                          className="btn-action btn-history"
-                          onClick={() => setHistoryEmployee(emp)}
+                          onClick={() => setHistoryEmp(emp)}
                           title="View History"
+                          className={actionBtn('hover:bg-accent/10 hover:border-accent/20 hover:text-accent')}
                         >
                           📋 History
                         </button>
+
                         <button
-                          className="btn-action btn-delete"
                           onClick={() => handleDelete(emp.employeeId, emp.fullName)}
                           disabled={!!actionLoading}
                           title="Delete Employee"
+                          className={actionBtn('hover:bg-rose/10 hover:border-rose/20 hover:text-rose')}
                         >
                           {actionLoading === `delete-${emp.employeeId}`
-                            ? <Loader size="sm" />
-                            : '🗑'}
+                            ? <Loader size="sm" /> : '🗑'}
                         </button>
                       </div>
                     </td>
@@ -163,10 +294,11 @@ const EmployeeList = ({ employees, todayAttendance, presentDaySummary = {}, load
         </div>
       )}
 
-      {historyEmployee && (
+      {/* Attendance History Modal */}
+      {historyEmp && (
         <AttendanceHistory
-          employee={historyEmployee}
-          onClose={() => setHistoryEmployee(null)}
+          employee={historyEmp}
+          onClose={() => setHistoryEmp(null)}
         />
       )}
     </div>
