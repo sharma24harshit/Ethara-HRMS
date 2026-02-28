@@ -150,7 +150,7 @@ const EmployeeList = ({ employees, presentDaySummary = {}, loading, onRefresh })
           <table className="w-full text-[13.5px] border-collapse">
             <thead>
               <tr>
-                {['Employee ID', 'Name & Email', 'Department', dateLabel, 'All-Time Summary', 'Actions'].map((h, i) => (
+                {['Employee ID', 'Name & Email', 'Department', dateLabel, 'Actions'].map((h, i) => (
                   <th key={i}
                     className="text-left text-[11px] font-bold uppercase tracking-widest
                                text-t3 px-5 py-3.5 border-b border-line whitespace-nowrap">
@@ -218,7 +218,7 @@ const EmployeeList = ({ employees, presentDaySummary = {}, loading, onRefresh })
                     </td>
 
                     {/* All-time summary */}
-                    <td className="px-5 py-3.5">
+                    {/* <td className="px-5 py-3.5">
                       <div className="flex items-center gap-2">
                         <span title="Present days"
                           className="font-display font-bold text-jade text-[13px]">
@@ -234,7 +234,7 @@ const EmployeeList = ({ employees, presentDaySummary = {}, loading, onRefresh })
                           {tMarked}d
                         </span>
                       </div>
-                    </td>
+                    </td> */}
 
                     {/* Actions */}
                     <td className="px-5 py-3.5">
@@ -296,6 +296,14 @@ const EmployeeList = ({ employees, presentDaySummary = {}, loading, onRefresh })
 
       {/* Attendance History Modal */}
       {historyEmp && (
+        <AttendanceHistory
+          employee={historyEmp}
+          onClose={() => setHistoryEmp(null)}
+        />
+      )}
+
+        {/* Employee delete Modal */}
+        {historyEmp && (
         <AttendanceHistory
           employee={historyEmp}
           onClose={() => setHistoryEmp(null)}

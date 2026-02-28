@@ -13,6 +13,6 @@ To do
 - Update delete confirmation modal UI
 - update the icons in application
 - fix the posiiton of history modal, its should be center aligned
-
+- fix main readme file text
 
 https://ethara-hrms-eight.vercel.app/

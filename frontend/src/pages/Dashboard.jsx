@@ -5,11 +5,11 @@ import { getEmployees, getAttendanceByDate, getAttendanceSummary } from '../serv
 import getTodayDate from '../utils/getTodayDate';
 
 const Dashboard = () => {
-  const [employees,        setEmployees] = useState([]);
+  const [employees, setEmployees] = useState([]);
   const [presentDaySummary, setSummary] = useState({});
-  const [loading,          setLoading]  = useState(true);
-  const [stats,            setStats]    = useState({ total: 0, present: 0, absent: 0, unmarked: 0 });
-  const [showAddModal,     setShowAdd]  = useState(false);
+  const [loading, setLoading]  = useState(true);
+  const [stats, setStats]    = useState({ total: 0, present: 0, absent: 0, unmarked: 0 });
+  const [showAddModal, setShowAdd]  = useState(false);
 
   const today = getTodayDate();
 
