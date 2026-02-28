@@ -23,9 +23,7 @@ A full-stack MERN application for managing employees and tracking attendance —
 - [Project Structure](#project-structure)
 - [Prerequisites](#prerequisites)
 - [Getting Started](#getting-started)
-- [Environment Variables](#environment-variables)
 - [API Reference](#api-reference)
-- [Data Models](#data-models)
 - [Deployment](#deployment)
 
 ---
