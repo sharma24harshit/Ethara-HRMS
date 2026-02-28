@@ -27,6 +27,11 @@ A full-stack MERN application for managing employees and tracking attendance —
 - [Deployment](#deployment)
 
 ---
+## Deployment
+
+### Backend — Backend is deployed on Render.
+
+### Frontend — Frontend is deployed on Vercel on this Link (https://ethara-hrms-eight.vercel.app/)
 
 ## Features
 
@@ -34,10 +39,8 @@ A full-stack MERN application for managing employees and tracking attendance —
 - **Flexible Attendance Marking** — Mark Present / Absent for any employee on any past date using the built-in date picker; future dates are blocked
 - **Monthly Summary Schema** — Attendance is stored as one document per employee per month with pre-computed counters (`presentCount`, `absentCount`, `totalMarked`) for O(1) summary reads
 - **All-Time Summary Column** — Each employee row shows total ✓ Present / ✗ Absent / total marked days aggregated across all months
-- **Attendance History Modal** — Per-employee history with three filter controls: Exact Date, Month, and Status (server-side month filter + client-side date/status filter)
+- **Attendance History Modal** — Per-employee history with two filter controls: Exact Date and Status (client-side date/status filter)
 - **Live Stats Bar** — Dashboard header shows Today's Present / Absent / Not Marked counts, always reflecting the current day
-- **Dark Editorial UI** — Syne + DM Sans typography, fully built with Tailwind CSS utility classes and a custom design token config
-
 ---
 
 ## Tech Stack
@@ -48,7 +51,7 @@ A full-stack MERN application for managing employees and tracking attendance —
 | Styling    | Tailwind CSS             |
 | HTTP Client| Axios                    | 
 | Backend    | Node.js + Express        |
-| Database   | MongoDB (Mongoose ODM)   |
+| Database   | MongoDB                  |
 | Dev Server | Nodemon                  |
 
 ---
@@ -110,7 +113,6 @@ Make sure the following are installed on your machine before proceeding:
 |------------|-----------------|---------------------|
 | Node.js    | 16.x            | `node -v`           |
 | npm        | 8.x             | `npm -v`            |
-| MongoDB    | 5.x (local) or MongoDB Atlas account | — |
 
 ---
 
@@ -255,12 +257,6 @@ VITE_API_URL=http://localhost:5173
 ```
 
 > Marking an already-marked date updates the existing record (Present → Absent or vice versa).
-
-## Deployment
-
-### Backend — [Render](https://render.com)
-
-### Frontend — [Vercel](https://vercel.com)
 
 
 <div align="center">
