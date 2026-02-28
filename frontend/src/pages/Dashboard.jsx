@@ -5,11 +5,12 @@ import { getEmployees, getAttendanceByDate, getAttendanceSummary } from '../serv
 import getTodayDate from '../utils/getTodayDate';
 
 const Dashboard = () => {
-  const [employees, setEmployees] = useState([]);
+  const [employees,        setEmployees] = useState([]);
   const [presentDaySummary, setSummary] = useState({});
-  const [loading, setLoading]  = useState(true);
-  const [stats, setStats]    = useState({ total: 0, present: 0, absent: 0, unmarked: 0 });
-  const [showAddModal, setShowAdd]  = useState(false);
+  const [loading,          setLoading]  = useState(true);
+  const [stats,            setStats]    = useState({ total: 0, present: 0, absent: 0, unmarked: 0 });
+  const [showAddModal,     setShowAdd]  = useState(false);
+  const [toast,            setToast]    = useState(null); // { message, type }
 
   const today = getTodayDate();
 
@@ -40,7 +41,16 @@ const Dashboard = () => {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  const handleEmployeeAdded = () => { setShowAdd(false); fetchData(); };
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 4000);
+  };
+
+  const handleEmployeeAdded = (fullName) => {
+    setShowAdd(false);
+    fetchData();
+    showToast(`Employee "${fullName}" added successfully!`);
+  };
 
   /* ── Stats card config ── */
   const statCards = [
@@ -63,7 +73,7 @@ const Dashboard = () => {
                           shadow-glow-accent flex-shrink-0">E</div>
           <div>
             <h1 className="font-display font-extrabold text-[22px] text-t1 leading-tight
-                           tracking-wide">ETHARA HRMS</h1>
+                           tracking-wide">HRMS</h1>
             <p className="text-[11px] text-t3 uppercase tracking-[0.08em] mt-0.5">
               Human Resource Management System
             </p>
@@ -142,6 +152,23 @@ const Dashboard = () => {
               <EmployeeForm onEmployeeAdded={handleEmployeeAdded} />
             </div>
           </div>
+        </div>
+      )}
+      {/* ── Toast Notification ── */}
+      {toast && (
+        <div className={`fixed bottom-6 right-6 z-[60] flex items-center gap-3 px-5 py-3.5
+                         rounded-xl border shadow-modal animate-slide-up max-w-sm
+                         ${toast.type === 'success'
+                           ? 'bg-surface border-jade/30 text-jade'
+                           : 'bg-surface border-rose/30 text-rose'}`}>
+          <span className="text-lg flex-shrink-0">
+            {toast.type === 'success' ? '✓' : '⚠'}
+          </span>
+          <p className="text-[13px] font-medium text-t1 leading-snug">{toast.message}</p>
+          <button
+            onClick={() => setToast(null)}
+            className="ml-auto text-t3 hover:text-t1 text-xs flex-shrink-0 transition-colors"
+          >✕</button>
         </div>
       )}
     </div>

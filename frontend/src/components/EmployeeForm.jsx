@@ -3,9 +3,8 @@ import { createEmployee } from '../services/api';
 import Loader from './Loader';
 
 const DEPARTMENTS = [
-  'Marketing','Sales',
-  'Human Resources','Operations',
-  'Data & Analytics','IT', 'Other'
+ 'Marketing','Sales','Finance',
+ 'IT & Infrastructure', 'Other'
 ];
 
 /* ── shared Tailwind snippets ── */
@@ -41,7 +40,7 @@ const EmployeeForm = ({ onEmployeeAdded }) => {
       await createEmployee(form);
       setSuccess(`Employee "${fullName}" added successfully!`);
       setForm({ employeeId: '', fullName: '', email: '', department: '' });
-      if (onEmployeeAdded) onEmployeeAdded();
+      if (onEmployeeAdded) onEmployeeAdded(fullName);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to add employee.');
     } finally {

@@ -3,6 +3,8 @@ import { deleteEmployee, markAttendance, getAttendanceByDate } from '../services
 import AttendanceHistory from './AttendanceHistory';
 import Loader from './Loader';
 import getTodayDate from '../utils/getTodayDate';
+import { MdDelete } from "react-icons/md";
+import { FaRegUser } from "react-icons/fa";
 
 /* ── Shared input style ── */
 const inputCls =
@@ -25,6 +27,7 @@ const EmployeeList = ({ employees, presentDaySummary = {}, loading, onRefresh })
   const [historyEmp,     setHistoryEmp]   = useState(null);
   const [actionLoading,  setActionLoad]   = useState('');
   const [error,          setError]        = useState('');
+  const [deleteTarget,   setDeleteTarget] = useState(null); // { employeeId, fullName }
 
   /* ── Fetch attendance for selected date ── */
   const fetchDateAttendance = useCallback(async (date) => {
@@ -60,7 +63,13 @@ const EmployeeList = ({ employees, presentDaySummary = {}, loading, onRefresh })
   };
 
   const handleDelete = async (employeeId, fullName) => {
-    if (!window.confirm(`Delete employee "${fullName}"? This cannot be undone.`)) return;
+    setDeleteTarget({ employeeId, fullName });
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    const { employeeId } = deleteTarget;
+    setDeleteTarget(null);
     setActionLoad(`delete-${employeeId}`); setError('');
     try {
       await deleteEmployee(employeeId);
@@ -87,7 +96,7 @@ const EmployeeList = ({ employees, presentDaySummary = {}, loading, onRefresh })
         {/* Left: title */}
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 flex items-center justify-center bg-elevated
-                          border border-line rounded-md text-lg flex-shrink-0">👥</div>
+                          border border-line rounded-md text-lg flex-shrink-0"><FaRegUser /></div>
           <h2 className="font-display font-bold text-[18px] text-t1">Employees</h2>
           <span className="bg-accent/10 border border-accent/20 text-accent text-[12px]
                            font-semibold rounded-full px-2.5 py-0.5 font-display">
@@ -150,7 +159,7 @@ const EmployeeList = ({ employees, presentDaySummary = {}, loading, onRefresh })
           <table className="w-full text-[13.5px] border-collapse">
             <thead>
               <tr>
-                {['Employee ID', 'Name & Email', 'Department', dateLabel, 'Actions'].map((h, i) => (
+                {['Employee ID', 'Name & Email', 'Department', dateLabel, 'All-Time Summary', 'Actions'].map((h, i) => (
                   <th key={i}
                     className="text-left text-[11px] font-bold uppercase tracking-widest
                                text-t3 px-5 py-3.5 border-b border-line whitespace-nowrap">
@@ -218,7 +227,7 @@ const EmployeeList = ({ employees, presentDaySummary = {}, loading, onRefresh })
                     </td>
 
                     {/* All-time summary */}
-                    {/* <td className="px-5 py-3.5">
+                    <td className="px-5 py-3.5">
                       <div className="flex items-center gap-2">
                         <span title="Present days"
                           className="font-display font-bold text-jade text-[13px]">
@@ -234,7 +243,7 @@ const EmployeeList = ({ employees, presentDaySummary = {}, loading, onRefresh })
                           {tMarked}d
                         </span>
                       </div>
-                    </td> */}
+                    </td>
 
                     {/* Actions */}
                     <td className="px-5 py-3.5">
@@ -282,7 +291,7 @@ const EmployeeList = ({ employees, presentDaySummary = {}, loading, onRefresh })
                           className={actionBtn('hover:bg-rose/10 hover:border-rose/20 hover:text-rose')}
                         >
                           {actionLoading === `delete-${emp.employeeId}`
-                            ? <Loader size="sm" /> : '🗑'}
+                            ? <Loader size="sm" /> : <MdDelete />}
                         </button>
                       </div>
                     </td>
@@ -302,12 +311,64 @@ const EmployeeList = ({ employees, presentDaySummary = {}, loading, onRefresh })
         />
       )}
 
-        {/* Employee delete Modal */}
-        {historyEmp && (
-        <AttendanceHistory
-          employee={historyEmp}
-          onClose={() => setHistoryEmp(null)}
-        />
+      {/* Delete Confirmation Modal */}
+      {deleteTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-5
+                     bg-black/75 backdrop-blur-sm animate-fade-in"
+          onClick={(e) => e.target === e.currentTarget && setDeleteTarget(null)}
+        >
+          <div className="bg-surface border border-line rounded-2xl w-full max-w-[420px]
+                          shadow-modal animate-slide-up">
+
+            {/* Modal Header */}
+            <div className="flex items-start justify-between px-7 pt-6 pb-5 border-b border-line">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 flex items-center justify-center bg-rose/10
+                                border border-rose/20 rounded-md text-lg flex-shrink-0">🗑</div>
+                <div>
+                  <h2 className="font-display font-bold text-[17px] text-t1">Delete Employee</h2>
+                  <p className="text-[12px] text-t3 mt-0.5">This action cannot be undone</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setDeleteTarget(null)}
+                className="w-8 h-8 flex items-center justify-center bg-elevated border border-line
+                           rounded-md text-t2 text-sm transition-all hover:bg-rose/10
+                           hover:border-rose/30 hover:text-rose"
+                aria-label="Close"
+              >✕</button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="px-7 py-6">
+              <p className="text-[14px] text-t2 leading-relaxed">
+                Are you sure you want to delete{' '}
+                <span className="font-semibold text-t1">"{deleteTarget.fullName}"</span>?
+                {' '}Their employee record and all attendance history will be permanently removed.
+              </p>
+
+              <div className="flex items-center gap-3 mt-6">
+                <button
+                  onClick={() => setDeleteTarget(null)}
+                  className="flex-1 px-4 py-2.5 bg-elevated border border-line rounded-lg
+                             text-t2 text-[13px] font-semibold transition-all
+                             hover:bg-hover hover:text-t1"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  className="flex-1 px-4 py-2.5 bg-rose/10 border border-rose/25 rounded-lg
+                             text-rose text-[13px] font-semibold transition-all
+                             hover:bg-rose/20 hover:border-rose/40"
+                >
+                  Yes, Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
