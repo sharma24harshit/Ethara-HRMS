@@ -8,6 +8,11 @@ Check this before submitting :
 - Simple but professional UI
 - Good README
 
+To do
 - add a toast or message when a new employee is getting added
+- Update delete confirmation modal UI
+- update the icons in application
+- fix the posiiton of history modal, its should be center aligned
+
 
 https://ethara-hrms-eight.vercel.app/

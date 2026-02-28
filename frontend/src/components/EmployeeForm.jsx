@@ -3,9 +3,9 @@ import { createEmployee } from '../services/api';
 import Loader from './Loader';
 
 const DEPARTMENTS = [
-  'Engineering','Product','Design','Marketing','Sales','Finance',
-  'Human Resources','Operations','Legal','Customer Support',
-  'Data & Analytics','IT & Infrastructure',
+  'Marketing','Sales',
+  'Human Resources','Operations',
+  'Data & Analytics','IT', 'Other'
 ];
 
 /* ── shared Tailwind snippets ── */
