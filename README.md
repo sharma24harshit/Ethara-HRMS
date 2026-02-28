@@ -121,7 +121,7 @@ Make sure the following are installed on your machine before proceeding:
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/ethara-hrms.git
+git clone https://github.com/sharma24harshit/Ethara-HRMS/tree/main
 cd ETHARA-HRMS
 ```
 
@@ -141,16 +141,9 @@ cp .env.example .env
 
 Start the backend server:
 
-```bash
-# Development (auto-restarts on file change)
-npm run dev
-
 # Production
 npm start
 ```
-
-The API will be running at: **`http://localhost:5000`**
-
 ---
 
 ### 3. Set up the Frontend
@@ -166,16 +159,16 @@ Create the environment file:
 
 ```bash
 cp .env.example .env
-# REACT_APP_API_URL should point to your backend URL
+# VITE_API_URL should point to your backend URL
 ```
 
 Start the React development server:
 
 ```bash
-npm start
+npm run dev
 ```
 
-The app will open at: **`http://localhost:3000`**
+The app will open at: **`http://localhost:5173`**
 
 ---
 
@@ -199,7 +192,6 @@ This generates an optimized production bundle in `frontend/build/`.
 PORT=5000
 
 # MongoDB connection string
-# Local:   mongodb://localhost:27017/ethara-hrms
 # Atlas:   mongodb+srv://<user>:<password>@cluster.mongodb.net/ethara-hrms
 MONGO_URI=mongodb://localhost:27017/ethara-hrms
 ```
@@ -209,14 +201,11 @@ MONGO_URI=mongodb://localhost:27017/ethara-hrms
 ```env
 # Base URL of the backend API
 # Local development:
-VITE_API_URL=http://localhost:5000
+VITE_API_URL=http://localhost:5173
 
 # After deploying backend (e.g. Render):
 # VITE_API_URL=https://your-backend.onrender.com
 ```
-
-> **Note:** React environment variables must be prefixed with `REACT_APP_` to be accessible in the browser bundle. Changes to `.env` require restarting the dev server.
-
 ---
 
 ## API Reference
@@ -269,129 +258,12 @@ VITE_API_URL=http://localhost:5000
 
 > Marking an already-marked date updates the existing record (Present → Absent or vice versa).
 
----
-
-## Data Models
-
-### Employee
-```js
-{
-  employeeId: String,   // unique, required
-  fullName:   String,   // required
-  email:      String,   // unique, required, email format validated
-  department: String,   // required
-  createdAt:  Date,
-  updatedAt:  Date
-}
-```
-
-### Attendance (Monthly Summary)
-```js
-{
-  employeeId:   String,    // required, indexed
-  month:        String,    // "YYYY-MM" — one doc per employee per month
-  days: {
-    "01": "Present",       // zero-padded day key → status value
-    "15": "Absent",
-    // ...
-  },
-  presentCount: Number,    // maintained in sync on every write
-  absentCount:  Number,
-  totalMarked:  Number,
-  createdAt:    Date,
-  updatedAt:    Date
-}
-// Unique index: { employeeId, month }
-```
-
----
-
 ## Deployment
 
 ### Backend — [Render](https://render.com)
 
-Render is the recommended platform for the Express + MongoDB backend.
-
-1. Push your code to a GitHub repository
-2. Go to [render.com](https://render.com) → **New → Web Service**
-3. Connect your GitHub repo and select the `backend/` root directory
-4. Configure the service:
-
-   | Setting        | Value              |
-   |----------------|--------------------|
-   | **Runtime**    | Node                |
-   | **Build Command** | `npm install`   |
-   | **Start Command** | `npm start`     |
-   | **Branch**     | `main`              |
-
-5. Add Environment Variables in the Render dashboard:
-
-   ```
-   PORT        = 10000         (Render sets PORT automatically, but set it as backup)
-   MONGO_URI   = mongodb+srv://...  (your Atlas connection string)
-   NODE_ENV    = production
-   ```
-
-6. Click **Deploy** — Render will give you a URL like `https://ethara-hrms-api.onrender.com`
-7. Update `frontend/.env` → `REACT_APP_API_URL=https://ethara-hrms-api.onrender.com`
-
-> **Free tier note:** Render's free tier spins down after 15 minutes of inactivity. The first request after sleep may take ~30 seconds. Upgrade to a paid instance for always-on availability.
-
----
-
 ### Frontend — [Vercel](https://vercel.com)
 
-Vercel is the recommended platform for the React frontend.
-
-1. Go to [vercel.com](https://vercel.com) → **New Project**
-2. Import your GitHub repository
-3. Set the **Root Directory** to `frontend`
-4. Vercel auto-detects Create React App — build settings are pre-filled:
-
-   | Setting           | Value            |
-   |-------------------|------------------|
-   | **Framework**     | Create React App |
-   | **Build Command** | `npm run build`  |
-   | **Output Dir**    | `build`          |
-
-5. Add Environment Variables in the Vercel dashboard:
-
-   ```
-   REACT_APP_API_URL = https://ethara-hrms-api.onrender.com
-   ```
-
-6. Click **Deploy** — Vercel will give you a URL like `https://ethara-hrms.vercel.app`
-
-> **Important:** Every time you redeploy the backend (new Render URL), update `REACT_APP_API_URL` in Vercel and trigger a redeploy so the frontend bundle picks up the new URL.
-
----
-
-### Database — [MongoDB Atlas](https://cloud.mongodb.com)
-
-1. Create a free account at [cloud.mongodb.com](https://cloud.mongodb.com)
-2. Create a new **Cluster** (M0 Free Tier is sufficient)
-3. Under **Database Access** → Add a user with read/write permissions
-4. Under **Network Access** → Add IP `0.0.0.0/0` (allow all) for hosted deployments
-5. Click **Connect → Drivers** and copy the connection string:
-   ```
-   mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/ethara-hrms?retryWrites=true&w=majority
-   ```
-6. Paste this as `MONGO_URI` in both your local `backend/.env` and Render's environment variables
-
----
-
-## Local Development Summary
-
-```
-Terminal 1 (Backend)          Terminal 2 (Frontend)
-─────────────────────         ──────────────────────
-cd backend                    cd frontend
-npm install                   npm install
-npm run dev                   npm start
-→ localhost:5000               → localhost:3000
-```
-
----
 
 <div align="center">
   Built with the MERN stack · Styled with Tailwind CSS · Deployed on Vercel + Render + MongoDB Atlas

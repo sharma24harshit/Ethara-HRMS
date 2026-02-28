@@ -110,7 +110,7 @@ const Dashboard = () => {
                        font-display font-semibold text-[14px] px-5 py-2.5 rounded-xl
                        shadow-glow-accent transition-all active:scale-[0.98] whitespace-nowrap"
           >
-            <span className="text-base leading-none">＋</span> Add Employee
+            <span className="text-base leading-none">+</span> Add Employee
           </button>
       </div>
       <main>

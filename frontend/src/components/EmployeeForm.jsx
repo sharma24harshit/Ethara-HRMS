@@ -7,7 +7,6 @@ const DEPARTMENTS = [
  'IT & Infrastructure', 'Other'
 ];
 
-/* ── shared Tailwind snippets ── */
 const inputCls =
   'w-full bg-elevated border border-line rounded-lg text-t1 font-body text-sm ' +
   'px-3 py-2.5 outline-none transition-all duration-200 ' +

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { getAttendanceByEmployee } from '../services/api';
 import Loader from './Loader';
 import getTodayDate from '../utils/getTodayDate';
+import { IoDocumentTextOutline } from "react-icons/io5";
 
 const getCurrentMonth = () => getTodayDate().slice(0, 7);
 const EMPTY_FILTERS   = { date: '', month: '', status: '' };
@@ -59,7 +60,7 @@ const AttendanceHistory = ({ employee, onClose }) => {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-5
-                 bg-black/75 backdrop-blur-sm animate-fade-in"
+                 bg-black/60 backdrop-blur-md animate-fade-in"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div className="bg-surface border border-line rounded-2xl w-full max-w-[680px]
@@ -99,9 +100,9 @@ const AttendanceHistory = ({ employee, onClose }) => {
               onChange={handleFilterChange} className={inputCls} />
           </div>
 
-          <span className="text-[11px] italic text-t3 pb-2">or</span>
+          {/* <span className="text-[11px] italic text-t3 pb-2">or</span> */}
 
-          <div className="flex flex-col gap-1">
+          {/* <div className="flex flex-col gap-1">
             <label htmlFor="hist-month"
               className="text-[10px] font-semibold uppercase tracking-widest text-t3">
               Month
@@ -109,7 +110,7 @@ const AttendanceHistory = ({ employee, onClose }) => {
             <input id="hist-month" name="month" type="month"
               value={filters.month} max={getCurrentMonth()}
               onChange={handleFilterChange} className={inputCls} />
-          </div>
+          </div> */}
 
           <div className="flex flex-col gap-1">
             <label htmlFor="hist-status"
@@ -165,7 +166,7 @@ const AttendanceHistory = ({ employee, onClose }) => {
 
           {!loading && !error && records.length === 0 && (
             <div className="flex flex-col items-center justify-center py-12 text-t3">
-              <span className="text-4xl mb-3 opacity-40">📋</span>
+              <span className="text-4xl mb-3 opacity-40"><IoDocumentTextOutline /></span>
               <p className="text-sm">
                 {hasActiveFilters
                   ? 'No records match the applied filters.'

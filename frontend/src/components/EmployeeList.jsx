@@ -5,6 +5,8 @@ import Loader from './Loader';
 import getTodayDate from '../utils/getTodayDate';
 import { MdDelete } from "react-icons/md";
 import { FaRegUser } from "react-icons/fa";
+import { TiTick } from "react-icons/ti";
+import { IoDocumentTextOutline } from "react-icons/io5";
 
 /* ── Shared input style ── */
 const inputCls =
@@ -99,8 +101,8 @@ const EmployeeList = ({ employees, presentDaySummary = {}, loading, onRefresh })
                           border border-line rounded-md text-lg flex-shrink-0"><FaRegUser /></div>
           <h2 className="font-display font-bold text-[18px] text-t1">Employees</h2>
           <span className="bg-accent/10 border border-accent/20 text-accent text-[12px]
-                           font-semibold rounded-full px-2.5 py-0.5 font-display">
-            {employees.length}
+                           font-semibold rounded-sm px-4 py-2 font-display">
+            Count :- {employees.length}
           </span>
         </div>
 
@@ -159,7 +161,7 @@ const EmployeeList = ({ employees, presentDaySummary = {}, loading, onRefresh })
           <table className="w-full text-[13.5px] border-collapse">
             <thead>
               <tr>
-                {['Employee ID', 'Name & Email', 'Department', dateLabel, 'All-Time Summary', 'Actions'].map((h, i) => (
+                {['Employee ID', 'Name & Email', 'Department', dateLabel, 'Actions'].map((h, i) => (
                   <th key={i}
                     className="text-left text-[11px] font-bold uppercase tracking-widest
                                text-t3 px-5 py-3.5 border-b border-line whitespace-nowrap">
@@ -227,7 +229,7 @@ const EmployeeList = ({ employees, presentDaySummary = {}, loading, onRefresh })
                     </td>
 
                     {/* All-time summary */}
-                    <td className="px-5 py-3.5">
+                    {/* <td className="px-5 py-3.5">
                       <div className="flex items-center gap-2">
                         <span title="Present days"
                           className="font-display font-bold text-jade text-[13px]">
@@ -243,7 +245,7 @@ const EmployeeList = ({ employees, presentDaySummary = {}, loading, onRefresh })
                           {tMarked}d
                         </span>
                       </div>
-                    </td>
+                    </td> */}
 
                     {/* Actions */}
                     <td className="px-5 py-3.5">
@@ -281,7 +283,7 @@ const EmployeeList = ({ employees, presentDaySummary = {}, loading, onRefresh })
                           title="View History"
                           className={actionBtn('hover:bg-accent/10 hover:border-accent/20 hover:text-accent')}
                         >
-                          📋 History
+                          <IoDocumentTextOutline /> History
                         </button>
 
                         <button
